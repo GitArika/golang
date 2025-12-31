@@ -35,3 +35,4 @@ func main() {
 	clear(mapaSlices)
 	fmt.Println(mapaSlices)
 }
+
