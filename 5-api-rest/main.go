@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -10,6 +11,23 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
+
+type Response struct {
+	Error string `json:"error,omitempty"`
+	Data 	any 	 `json:"data,omitempty"`
+}
+
+func sendJSON(w http.ResponseWriter, resp Response, status int) {
+	data, err := json.Marshal(resp)
+	if err != nil {
+		fmt.Println("erro ao fazer marshal de json", err)
+		sendJSON(w, Response{Error: "something went wrong"}, http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(status)
+	w.Write(data)
+}
 
 type User struct {
 	Username 	string
@@ -63,15 +81,9 @@ func handleGetUsers(db map[int64]User) http.HandlerFunc {
 
 		user, ok := db[id]
 		if ok {
-			data, err := json.Marshal(user)
-			if err != nil {
-				http.Error(w, "something went wrong", http.StatusInternalServerError)
-				return
-			}
-
-			w.Write(data)
+			sendJSON(w, Response{Data: user}, http.StatusOK)
 		} else {
-			http.Error(w, "usuario não encontrado", http.StatusNotFound)
+			sendJSON(w, Response{Error: "usuário não encontrado"}, http.StatusNotFound)
 			return
 		}
 	}
@@ -84,21 +96,21 @@ func handlePostUsers(db map[int64]User) http.HandlerFunc {
 		if err != nil {
 			var maxErr *http.MaxBytesError
 			if errors.As(err, &maxErr) {
-				http.Error(w, "body too large", http.StatusRequestEntityTooLarge)
+				sendJSON(w, Response{Error: "body too large"}, http.StatusRequestEntityTooLarge)
 				return
 			} else {
-				http.Error(w, "something went wrong", http.StatusInternalServerError)
+				sendJSON(w, Response{Error: "something went wrong"}, http.StatusInternalServerError)
 			}
 		}
 
 		var user User
 		if err := json.Unmarshal(data, &user); err != nil {
-			http.Error(w, "invalid body", http.StatusUnprocessableEntity)
+			sendJSON(w, Response{Error: "invalid body"}, http.StatusUnprocessableEntity)
 			return
 		}
 
 		db[user.ID] = user
-		w.WriteHeader(http.StatusCreated)
+		sendJSON(w, Response{Data: user}, http.StatusCreated)
 	}
 }
 
