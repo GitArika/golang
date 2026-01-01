@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -20,7 +20,7 @@ type Response struct {
 func sendJSON(w http.ResponseWriter, resp Response, status int) {
 	data, err := json.Marshal(resp)
 	if err != nil {
-		fmt.Println("erro ao fazer marshal de json", err)
+		slog.Error("erro ao fazer marshal de json", "error", err)
 		sendJSON(w, Response{Error: "something went wrong"}, http.StatusInternalServerError)
 		return
 	}
@@ -37,6 +37,7 @@ type User struct {
 }
 
 func main() {
+	slog.Info("serviço iniciado", "version", "1.0.0")
 	r := chi.NewMux()
 
 	r.Use(middleware.Recoverer)
