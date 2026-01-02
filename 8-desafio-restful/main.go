@@ -2,12 +2,11 @@ package main
 
 import (
 	"8-desafio-restful/api"
+	"8-desafio-restful/database"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 func main () {
@@ -18,19 +17,14 @@ func main () {
 }
 
 func run() error {
-	db := make(map[uuid.UUID]api.User, 10)
-	
-	// mock user for test
-	id := uuid.New()
-	user := api.User{
+	id, user := database.Insert(database.User{
 		FirstName: "Ariel",
 		LastName: "Evangelista",
 		Biography: "Tech Lead",
-	}
-	db[id] = user
+	})
 	slog.Info(id.String(), "user", user)
 
-	handler := api.CreateHandler(db)
+	handler := api.CreateHandler()
 
 	server := http.Server{
 		ReadTimeout: 10 * time.Second,
