@@ -6,6 +6,7 @@ import (
 )
 
 type User struct {
+	ID 				uuid.UUID `json:"id"`
 	FirstName string `json:"firstName"`
 	LastName 	string `json:"lastName"`
 	Biography string `json:"biography"`
@@ -15,8 +16,7 @@ type User struct {
 var db = make(map[uuid.UUID]User, 10)
 
 func FindAll () []User {
-	var n = len(db)
-	var users = make([]User, n)
+	users := make([]User, 0, len(db))
 	for _, user := range db {
 		users = append(users, user)
 	}
@@ -31,6 +31,7 @@ func FindByID(id uuid.UUID) (User, bool){
 
 func Insert(user User) (uuid.UUID, User) {
 	id := uuid.New()
+	user.ID = id
 	db[id] = user
 	
 	return id, user
@@ -40,7 +41,7 @@ func Update(id uuid.UUID, user User) (User, bool) {
 	if _, exists := db[id]; !exists {
 		return User{}, false
 	}
-
+	user.ID = id
 	db[id] = user
 	return user, true
 }
