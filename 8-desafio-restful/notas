@@ -1,0 +1,28 @@
+# Servidor
+
+> Tem um handler (para requisições, rotas, etc)
+> http.Server (instância com configurações do server)
+> server.ListenAndServe() // Pode causar erro
+
+
+## Configurações do server
+
+> ReadTimeout: tempo limite para o server processar header/body da requisição
+> WriteTimeout: tempo limite para o server responder a requisição
+> IdleTimout: tempo limite para manter uma conexão oceosa ativa
+> Addr: endereço de escuta do servidor
+> Handler: http request handlers (rotas, methods, etc)
+
+## Configurações do handler
+
+> type Response struct
+> func sendJSON: utilitario para respostas (set header, json.Marshal, w.WriteHeader, w.Write)
+> handler: chi.NewMux // Sistema de rotas MUX da biblioteca chi para go
+> middleware: Recoverer, RequestID, Logger
+
+## Dependencias
+
+> github.com/go-chi/chi/v5: handler library 
+> github.com/google/uuid: uuid feature for go
+
+
